@@ -494,8 +494,13 @@ const mockColleges = [
         "fees": "₹25,000"
       }
     ],
-    "facilities": ["Library", "Multiple Hostels", "Sports Complex", "Medical Center", "Auditorium", "Computer Centers", "Research Labs","Guest House"],
-    "contact": {},
+    "facilities": ["Dhanvantri Library", "Multiple Hostels", "Sports Complex", "Medical Center", "Auditorium", "Computer Centers", "Research Labs", "Guest House"],
+    "contact": {
+      "phone": "0191-2435248, 2435259, 2453544, 2453588",
+      "email": "helpdesk@jammuuniversity.ac.in",
+      "website": "https://www.jammuuniversity.ac.in",
+      "address": "Baba Saheb Ambedkar Road, Jammu, J&K, India - 180006",
+    },
     "rating": null,
     "distance": null
   },
@@ -606,8 +611,14 @@ const mockColleges = [
         "fees": "₹49,300"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["400 acres campus", "50+ Labs", "Modern Classrooms", "Library", "Hostels (AC)", "Sports Complex", "Medical Center", "24/7 Wi-Fi", "Instrumentation Facility"]
+    ,
+    "contact": {
+      "phone": "0191-2570633",
+      "email": "accounts@iitjammu.ac.in",
+      "website": "https://www.iitjammu.ac.in",
+      "address": "Jagti, NH-44, PO Nagrota, Jammu - 181221, J&K, India",
+    },
     "rating": null,
     "distance": null
   },
@@ -742,8 +753,14 @@ const mockColleges = [
         "fees": "₹5.4L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Dal Lake Campus", "Hostel (Boys/Girls)", "Central Library", "Labs", "Sports Complex", "Medical Center", "Guest House", "Shopping Complex", "Gym"]
+    ,
+    "contact": {
+      "phone": "Contact through departments",
+      "email": "deanstudentswelfare@nitsri.ac.in",
+      "website": "https://nitsri.ac.in",
+      "address": "Hazratbal, Srinagar, J&K, India - 190006",
+    },
     "rating": null,
     "distance": null
   },
@@ -894,8 +911,14 @@ const mockColleges = [
         "fees": "₹2.66L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["470-acre residential campus", "Modern Labs", "Library", "Hostels", "Sports Complex", "Medical Center", "Cafeteria", "Auditorium", "Wi-Fi", "Research Centers"]
+    ,
+    "contact": {
+      "phone": "01991-285524",
+      "email": "info@smvdu.ac.in",
+      "website": "https://smvdu.ac.in",
+      "address": "Sub Post Office - Kakryal, Katra, Reasi, J&K - 182320",
+    },
     "rating": null,
     "distance": null
   },
@@ -1006,8 +1029,14 @@ const mockColleges = [
         "fees": "₹2.7L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Modern Campus", "Engineering Labs", "Library", "Hostels", "Sports Facilities", "Medical Center", "Mosque", "Computer Centers"]
+    ,
+    "contact": {
+      "phone": "01933-247955",
+      "email": "info@islamicuniversity.edu.in",
+      "website": "https://www.islamicuniversity.edu.in",
+      "address": "Awantipora, Pulwama, J&K - 192122",
+    },
     "rating": null,
     "distance": null
   },
@@ -1126,8 +1155,14 @@ const mockColleges = [
         "fees": "₹5.49L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["610-acre campus", "Central Library", "Wi-Fi", "ICT Labs", "Seminar Hall", "Canteen", "Hostels", "Sports Facilities"]
+    ,
+    "contact": {
+      "phone": "01992-269144",
+      "email": "info@cujammu.ac.in",
+      "website": "https://www.cujammu.ac.in",
+      "address": "Rahya-Suchani, Bagla, Samba, J&K - 181143",
+    },
     "rating": null,
     "distance": null
   },
@@ -1262,8 +1297,14 @@ const mockColleges = [
         "fees": "₹1.69L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Modern Campus", "Library", "Labs", "Hostels", "Sports Complex", "Medical Center", "Auditorium", "Wi-Fi"]
+    ,
+    "contact": {
+      "phone": "01933-247956",
+      "email": "info@cukashmir.ac.in",
+      "website": "https://www.cukashmir.ac.in",
+      "address": "Nowgam, Srinagar, J&K - 190015",
+    },
     "rating": null,
     "distance": null
   },
@@ -1350,8 +1391,14 @@ const mockColleges = [
         "fees": "₹5,111"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Medical Facilities", "Modern Labs", "Library", "Hostels", "Research Centers", "Digital Healthcare"]
+    ,
+    "contact": {
+      "phone": "9541928215 (OPD Helpdesk)",
+      "email": "website@aiimsjammu.edu.in",
+      "website": "https://www.aiimsjammu.edu.in",
+      "address": "Bari Kamlia, Vijaypur, Samba, J&K - 184120",
+    },
     "rating": null,
     "distance": null
   },
@@ -1418,6 +1465,7 @@ const mockColleges = [
     ],
     "contact": {
       "phone": "0191-2741400 (Main Campus)",
+      "email": "admissions@iimj.ac.in",
       "website": "https://www.iimj.ac.in",
       "address": "Jagti, Jammu - 181221, J&K, India"
     },
@@ -1502,7 +1550,7 @@ export default function Colleges() {
         return <BookOpen className="h-4 w-4" />;
       case "hostel": case "boys hostel": case "girls hostel": case "hostel (boys/girls)": case "2 girls hostels": case "8 boys hostels": case "hostels": case "hostels(ac)": case "limited hostels": case "multiple hostels": case "guest house":
         return <Building className="h-4 w-4" />;
-      case "wifi": case "24/7 wi-fi":
+      case "wifi": case "24/7 wi-fi": case "wi-fi":
         return <Wifi className="h-4 w-4" />;
       case "computer lab": case "innovation center": case "computer center": case "computer centers": case "computer labs": case "ict labs":
         return <Laptop className="h-4 w-4" />;
