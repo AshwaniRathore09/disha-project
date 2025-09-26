@@ -121,15 +121,15 @@ export default function Index() {
           <Card className="cursor-pointer border border-gray-200 transition-all transform hover:-translate hover:border-orange-500 hover:shadow-lg">
             <CardHeader>
               <Calendar className="h-12 w-12 text-orange-600 mb-4" />
-              <CardTitle>Important Dates</CardTitle>
+              <CardTitle>Dashboard</CardTitle>
               <CardDescription>
-                Never miss admission deadlines, scholarship applications, or entrance exam dates
+                Your personal planner for college admissions, deadlines, and exam alerts - all in one place
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button variant="ghost" className="p-0 h-auto" asChild>
                 <Link to="/dashboard">
-                  View Timeline <ArrowRight className="ml-2 h-4 w-4" />
+                  View Dashboard <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </CardContent>
@@ -155,9 +155,9 @@ export default function Index() {
           <Card className="cursor-pointer border border-gray-200 transition-all transform hover:-translate hover:border-indigo-500 hover:shadow-lg">
             <CardHeader>
               <GraduationCap className="h-12 w-12 text-indigo-600 mb-4" />
-              <CardTitle>Personalized Guidance</CardTitle>
+              <CardTitle>Profile</CardTitle>
               <CardDescription>
-                Get AI-powered recommendations based on your profile, location, and career goals
+                Build your student identity to unlock tailored college and career guidance just for you
               </CardDescription>
             </CardHeader>
             <CardContent>

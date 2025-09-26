@@ -1674,12 +1674,12 @@ export default function Colleges() {
           </TabsContent>
         </Tabs>
 
-        <div className="flex gap-2 mt-4">
-          <Button className="flex-1">
+        <div className="flex flex-wrap gap-2 mt-4">
+          <Button className="flex-1 min-w-[120px]">
             Apply Now
             <ExternalLink className="ml-2 h-4 w-4" />
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="flex-1 min-w-[120px]">
             View Details
             <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
