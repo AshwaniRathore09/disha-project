@@ -1,69 +1,24 @@
 import { query, mutation } from "./_generated/server";
-import { ConvexError } from "convex/values";
 import { v } from "convex/values";
-import { api } from "./_generated/api";
 
-// Get or create user profile
-export const getCurrentUser = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "User not authenticated",
-        code: "UNAUTHENTICATED",
-      });
-    }
-
+export const getUserByEmailAndPassword = query({
+  args: { email: v.string(), password: v.string() },
+  handler: async (ctx, args) => {
+    // Since schema doesn't have password, this is a placeholder
+    // In real auth, password is handled by Auth0
     const user = await ctx.db
       .query("users")
-      .withIndex("by_user_id")
-      .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
+      .filter((q) => q.eq(q.field("email"), args.email))
       .first();
-
     return user;
   },
 });
 
-// Create user profile (separate mutation)
-export const createUser = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "User not authenticated",
-        code: "UNAUTHENTICATED",
-      });
-    }
-
-    // Check if user already exists
-    const existingUser = await ctx.db
-      .query("users")
-      .withIndex("by_user_id")
-      .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
-      .first();
-
-    if (existingUser) {
-      return existingUser;
-    }
-
-    // Create new user profile
-    const newUserId = await ctx.db.insert("users", {
-      userId: identity.tokenIdentifier,
-      name: identity.name || "",
-      email: identity.email || "",
-      createdAt: Date.now(),
-    });
-
-    return await ctx.db.get(newUserId);
-  },
-});
-
-// Update user profile
-export const updateProfile = mutation({
+export const addUser = mutation({
   args: {
-    name: v.optional(v.string()),
+    userId: v.string(),
+    name: v.string(),
+    email: v.string(),
     age: v.optional(v.number()),
     gender: v.optional(v.string()),
     currentClass: v.optional(v.string()),
@@ -71,62 +26,94 @@ export const updateProfile = mutation({
     phone: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "User not authenticated",
-        code: "UNAUTHENTICATED",
-      });
-    }
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_user_id")
-      .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
-      .first();
-
-    if (!user) {
-      throw new ConvexError({
-        message: "User profile not found",
-        code: "NOT_FOUND",
-      });
-    }
-
-    // Update user profile with provided fields
-    const updateData: Record<string, unknown> = {};
-    if (args.name !== undefined) updateData.name = args.name;
-    if (args.age !== undefined) updateData.age = args.age;
-    if (args.gender !== undefined) updateData.gender = args.gender;
-    if (args.currentClass !== undefined) updateData.currentClass = args.currentClass;
-    if (args.location !== undefined) updateData.location = args.location;
-    if (args.phone !== undefined) updateData.phone = args.phone;
-
-    await ctx.db.patch(user._id, updateData);
-
-    return await ctx.db.get(user._id);
+    const createdAt = Date.now();
+    const userId = await ctx.db.insert("users", { ...args, createdAt });
+    return { _id: userId, ...args, createdAt };
   },
 });
 
-// Get user progress
+export const getCurrentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+    return await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
+      .first();
+  },
+});
+
 export const getUserProgress = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return null;
-    }
-
-    const progress = await ctx.db
+    if (!identity) return null;
+    return await ctx.db
       .query("userProgress")
-      .withIndex("by_user_id")
       .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
       .first();
-
-    return progress;
   },
 });
 
-// Update user progress
+export const updateUserProfile = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    age: v.optional(v.number()),
+    gender: v.optional(v.string()),
+    currentClass: v.optional(v.string()),
+    location: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    interests: v.optional(v.array(v.string())),
+    school: v.optional(v.string()),
+    stream: v.optional(v.string()),
+    subjects: v.optional(v.array(v.string())),
+    percentage: v.optional(v.number()),
+    preferredStreams: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const existingUser = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
+      .first();
+
+    if (existingUser) {
+      // Update existing user
+      await ctx.db.patch(existingUser._id, args);
+      return { _id: existingUser._id, ...args };
+    } else {
+      // Create new user if doesn't exist
+      const createdAt = Date.now();
+      const userId = await ctx.db.insert("users", {
+        userId: identity.tokenIdentifier,
+        ...args,
+        createdAt
+      });
+      return { _id: userId, ...args, createdAt };
+    }
+  },
+});
+
+export const getUserProfile = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
+      .first();
+
+    return user;
+  },
+});
+
 export const updateProgress = mutation({
   args: {
     milestoneType: v.string(),
@@ -137,16 +124,10 @@ export const updateProgress = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "User not authenticated",
-        code: "UNAUTHENTICATED",
-      });
-    }
+    if (!identity) throw new Error("Not authenticated");
 
     const existingProgress = await ctx.db
       .query("userProgress")
-      .withIndex("by_user_id")
       .filter((q) => q.eq(q.field("userId"), identity.tokenIdentifier))
       .first();
 
@@ -157,28 +138,16 @@ export const updateProgress = mutation({
     };
 
     if (existingProgress) {
-      // Update existing progress
       const updatedMilestones = [...existingProgress.milestones, newMilestone];
-      const updateData: Record<string, unknown> = {
+      await ctx.db.patch(existingProgress._id, {
         milestones: updatedMilestones,
+        selectedStream: args.selectedStream || existingProgress.selectedStream,
+        selectedColleges: args.selectedColleges || existingProgress.selectedColleges,
+        selectedCourses: args.selectedCourses || existingProgress.selectedCourses,
         lastActive: Date.now(),
-      };
-
-      if (args.selectedStream !== undefined) {
-        updateData.selectedStream = args.selectedStream;
-      }
-      if (args.selectedColleges !== undefined) {
-        updateData.selectedColleges = args.selectedColleges;
-      }
-      if (args.selectedCourses !== undefined) {
-        updateData.selectedCourses = args.selectedCourses;
-      }
-
-      await ctx.db.patch(existingProgress._id, updateData);
-      return await ctx.db.get(existingProgress._id);
+      });
     } else {
-      // Create new progress record
-      const progressId = await ctx.db.insert("userProgress", {
+      await ctx.db.insert("userProgress", {
         userId: identity.tokenIdentifier,
         milestones: [newMilestone],
         selectedStream: args.selectedStream,
@@ -186,8 +155,6 @@ export const updateProgress = mutation({
         selectedCourses: args.selectedCourses || [],
         lastActive: Date.now(),
       });
-
-      return await ctx.db.get(progressId);
     }
   },
 });

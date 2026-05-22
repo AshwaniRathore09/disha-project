@@ -16,12 +16,14 @@ import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { useUser } from "@/hooks/use-auth.ts";
+import { useAuth } from "@/components/providers/auth.tsx";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api.js";
 
 export default function Dashboard() {
-  const { name, isLoading: userLoading } = useUser({ shouldRedirect: true });
+  const { user, isLoading: userLoading } = useAuth();
+
+  // Ensure user name is displayed from logged in user data
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Sample data - in real app, this would come from the backend
@@ -71,7 +73,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {getGreeting()}, Ashwani Rathore! {/*{name} is supposed to come here but for testing, we have hardcoded it*/}
+                {getGreeting()}, {user?.name || "Student"}!
               </h1>
               <p className="text-gray-600">Ready to continue your educational journey?</p>
             </div>

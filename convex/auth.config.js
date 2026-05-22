@@ -1,8 +1,11 @@
+// convex/auth.config.js
+
 export default {
   providers: [
     {
-      domain: process.env.HERCULES_OIDC_AUTHORITY,
-      applicationID: process.env.HERCULES_OIDC_CLIENT_ID,
+      // Using a custom passwordless provider
+      domain: process.env.CONVEX_SITE,
+      applicationID: "convex",
     },
-  ],
+  ]
 };

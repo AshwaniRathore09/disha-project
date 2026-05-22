@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { 
-  User, 
-  Settings, 
-  BookOpen, 
-  Award, 
-  MapPin, 
-  Phone, 
+import { useState, useEffect } from "react";
+import {
+  User,
+  Settings,
+  BookOpen,
+  Award,
+  MapPin,
+  Phone,
   Mail,
   Calendar,
   Edit,
@@ -27,7 +27,7 @@ import { Label } from "@/components/ui/label.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar.tsx";
 import { Progress } from "@/components/ui/progress.tsx";
-import { useUser } from "@/hooks/use-auth.ts";
+import { useAuth } from "@/components/providers/auth.tsx";
 
 // Mock user data - in real app, this would come from the backend
 const mockUserData = {
@@ -83,27 +83,118 @@ const mockUserData = {
 };
 
 export default function Profile() {
-  // const { name, email, avatar, isLoading } = useUser({ shouldRedirect: true });  Page was not loading due to this line - resaon - we dont have any auth system yet
-  const name = mockUserData.personalInfo.name;  //new line that was added to make the page render
-const email = mockUserData.personalInfo.email;  //new line that was added to make the page render
-const avatar = ""; // you can put a URL string if you want - //new line that was added to make the page render
-const isLoading = false;  //new line that was added to make the page render
+  // Fetch user profile data from backend
+  const { user: userProfile } = useAuth();
+
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(mockUserData.personalInfo);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize form data with user profile or default values
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    age: number | undefined;
+    gender: string;
+    currentClass: string;
+    location: string;
+    interests: string[];
+    bio: string;
+    school: string;
+    stream: string;
+    subjects: string[];
+    percentage: number | undefined;
+    preferredStreams: string[];
+  }>({
+    name: "",
+    email: "",
+    phone: "",
+    age: undefined,
+    gender: "",
+    currentClass: "",
+    location: "",
+    interests: [],
+    bio: "",
+    school: "",
+    stream: "",
+    subjects: [],
+    percentage: undefined,
+    preferredStreams: []
+  });
+
+  // Update form data when user profile is loaded
+  useEffect(() => {
+    if (userProfile) {
+      setFormData({
+        name: userProfile.name || "",
+        email: userProfile.email || "",
+        phone: userProfile.phone || "",
+        age: userProfile.age,
+        gender: userProfile.gender || "",
+        currentClass: userProfile.currentClass || "",
+        location: userProfile.location || "",
+        interests: userProfile.interests || [],
+        bio: userProfile.bio || "",
+        school: userProfile.school || "",
+        stream: userProfile.stream || "",
+        subjects: userProfile.subjects || [],
+        percentage: userProfile.percentage,
+        preferredStreams: userProfile.preferredStreams || []
+      });
+    }
+  }, [userProfile]);
 
   const handleSave = () => {
-    // In real app, this would save to backend
-    console.log("Saving profile data:", formData);
+    // For now, just exit edit mode without saving
+    // In a real app, this would save to a backend
     setIsEditing(false);
   };
+
   const handleCancel = () => {
-    setFormData(mockUserData.personalInfo);
+    if (userProfile) {
+      setFormData({
+        name: userProfile.name || "",
+        email: userProfile.email || "",
+        phone: userProfile.phone || "",
+        age: userProfile.age,
+        gender: userProfile.gender || "",
+        currentClass: userProfile.currentClass || "",
+        location: userProfile.location || "",
+        interests: userProfile.interests || [],
+        bio: userProfile.bio || "",
+        school: userProfile.school || "",
+        stream: userProfile.stream || "",
+        subjects: userProfile.subjects || [],
+        percentage: userProfile.percentage,
+        preferredStreams: userProfile.preferredStreams || []
+      });
+    }
     setIsEditing(false);
   };
 
-  const profileCompletion = 85; // Calculate based on filled fields
+  // Calculate profile completion percentage
+  const calculateProfileCompletion = () => {
+    const fields = [
+      formData.name,
+      formData.email,
+      formData.age,
+      formData.gender,
+      formData.currentClass,
+      formData.location,
+      formData.bio,
+      formData.school,
+      formData.stream,
+      formData.percentage
+    ];
+    const filledFields = fields.filter(field =>
+      field !== "" && field !== undefined && field !== null
+    ).length;
+    return Math.round((filledFields / fields.length) * 100);
+  };
 
-  if (isLoading) {
+  const profileCompletion = calculateProfileCompletion();
+
+  if (!userProfile) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -171,9 +262,8 @@ const isLoading = false;  //new line that was added to make the page render
                     <div className="flex items-start gap-6">
                       <div className="flex flex-col items-center">
                         <Avatar className="h-24 w-24 mb-4">
-                          <AvatarImage src={avatar} alt={name || "User"} />
                           <AvatarFallback className="text-2xl">
-                            {(name || "U").charAt(0)}
+                            {(formData.name || "U").charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         {isEditing && (

@@ -1,14 +1,10 @@
-
 import { useState, useMemo } from "react";
 import {
   MapPin,
   Search,
-  Filter,
   Star,
-  Users,
   BookOpen,
   Wifi,
-  Home,
   Building,
   Phone,
   Mail,
@@ -37,6 +33,7 @@ import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog.tsx";
 
 
 
@@ -247,8 +244,7 @@ const mockColleges = [
       "website": "https://www.kashmiruniversity.net",
       "address": "University of Kashmir, Hazratbal, Srinagar, Jammu and Kashmir 190006"
     },
-    "rating": 3.7,
-    // "distance": 2744 // Distance in km from current location (example value)
+    "rating": 3.7
   },
 
   {
@@ -494,8 +490,13 @@ const mockColleges = [
         "fees": "₹25,000"
       }
     ],
-    "facilities": ["Library", "Multiple Hostels", "Sports Complex", "Medical Center", "Auditorium", "Computer Centers", "Research Labs","Guest House"],
-    "contact": {},
+    "facilities": ["Dhanvantri Library", "Multiple Hostels", "Sports Complex", "Medical Center", "Auditorium", "Computer Centers", "Research Labs", "Guest House"],
+    "contact": {
+      "phone": "0191-2435248, 2435259, 2453544, 2453588",
+      "email": "helpdesk@jammuuniversity.ac.in",
+      "website": "https://www.jammuuniversity.ac.in",
+      "address": "Baba Saheb Ambedkar Road, Jammu, J&K, India - 180006",
+    },
     "rating": null,
     "distance": null
   },
@@ -606,8 +607,14 @@ const mockColleges = [
         "fees": "₹49,300"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["400 acres campus", "50+ Labs", "Modern Classrooms", "Library", "Hostels (AC)", "Sports Complex", "Medical Center", "24/7 Wi-Fi", "Instrumentation Facility"]
+    ,
+    "contact": {
+      "phone": "0191-2570633",
+      "email": "accounts@iitjammu.ac.in",
+      "website": "https://www.iitjammu.ac.in",
+      "address": "Jagti, NH-44, PO Nagrota, Jammu - 181221, J&K, India",
+    },
     "rating": null,
     "distance": null
   },
@@ -742,8 +749,14 @@ const mockColleges = [
         "fees": "₹5.4L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Dal Lake Campus", "Hostel (Boys/Girls)", "Central Library", "Labs", "Sports Complex", "Medical Center", "Guest House", "Shopping Complex", "Gym"]
+    ,
+    "contact": {
+      "phone": "Contact through departments",
+      "email": "deanstudentswelfare@nitsri.ac.in",
+      "website": "https://nitsri.ac.in",
+      "address": "Hazratbal, Srinagar, J&K, India - 190006",
+    },
     "rating": null,
     "distance": null
   },
@@ -894,8 +907,14 @@ const mockColleges = [
         "fees": "₹2.66L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["470-acre residential campus", "Modern Labs", "Library", "Hostels", "Sports Complex", "Medical Center", "Cafeteria", "Auditorium", "Wi-Fi", "Research Centers"]
+    ,
+    "contact": {
+      "phone": "01991-285524",
+      "email": "info@smvdu.ac.in",
+      "website": "https://smvdu.ac.in",
+      "address": "Sub Post Office - Kakryal, Katra, Reasi, J&K - 182320",
+    },
     "rating": null,
     "distance": null
   },
@@ -1006,8 +1025,14 @@ const mockColleges = [
         "fees": "₹2.7L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Modern Campus", "Engineering Labs", "Library", "Hostels", "Sports Facilities", "Medical Center", "Mosque", "Computer Centers"]
+    ,
+    "contact": {
+      "phone": "01933-247955",
+      "email": "info@islamicuniversity.edu.in",
+      "website": "https://www.islamicuniversity.edu.in",
+      "address": "Awantipora, Pulwama, J&K - 192122",
+    },
     "rating": null,
     "distance": null
   },
@@ -1126,8 +1151,14 @@ const mockColleges = [
         "fees": "₹5.49L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["610-acre campus", "Central Library", "Wi-Fi", "ICT Labs", "Seminar Hall", "Canteen", "Hostels", "Sports Facilities"]
+    ,
+    "contact": {
+      "phone": "01992-269144",
+      "email": "info@cujammu.ac.in",
+      "website": "https://www.cujammu.ac.in",
+      "address": "Rahya-Suchani, Bagla, Samba, J&K - 181143",
+    },
     "rating": null,
     "distance": null
   },
@@ -1262,8 +1293,14 @@ const mockColleges = [
         "fees": "₹1.69L"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Modern Campus", "Library", "Labs", "Hostels", "Sports Complex", "Medical Center", "Auditorium", "Wi-Fi"]
+    ,
+    "contact": {
+      "phone": "01933-247956",
+      "email": "info@cukashmir.ac.in",
+      "website": "https://www.cukashmir.ac.in",
+      "address": "Nowgam, Srinagar, J&K - 190015",
+    },
     "rating": null,
     "distance": null
   },
@@ -1350,8 +1387,14 @@ const mockColleges = [
         "fees": "₹5,111"
       }
     ],
-    "facilities": [],
-    "contact": {},
+    "facilities": ["Medical Facilities", "Modern Labs", "Library", "Hostels", "Research Centers", "Digital Healthcare"]
+    ,
+    "contact": {
+      "phone": "9541928215 (OPD Helpdesk)",
+      "email": "website@aiimsjammu.edu.in",
+      "website": "https://www.aiimsjammu.edu.in",
+      "address": "Bari Kamlia, Vijaypur, Samba, J&K - 184120",
+    },
     "rating": null,
     "distance": null
   },
@@ -1418,6 +1461,7 @@ const mockColleges = [
     ],
     "contact": {
       "phone": "0191-2741400 (Main Campus)",
+      "email": "admissions@iimj.ac.in",
       "website": "https://www.iimj.ac.in",
       "address": "Jagti, Jammu - 181221, J&K, India"
     },
@@ -1433,12 +1477,14 @@ const mockColleges = [
 export default function Colleges() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
   const [selectedStream, setSelectedStream] = useState("all");
   const [selectedFacilities, setSelectedFacilities] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState("rating");                              //default sorting by rating - removed distance sorting as distance data is not available
+  const [sortBy, setSortBy] = useState("rating");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const allStates = [...new Set(mockColleges.map(college => college.state))];
+  const allTypes = [...new Set(mockColleges.map(college => college.type))];
   const allStreams = [...new Set(mockColleges.flatMap(college => college.courses.map(course => course.stream)))];
   const allFacilities = [...new Set(mockColleges.flatMap(college => college.facilities))] as string[];
 
@@ -1447,21 +1493,25 @@ export default function Colleges() {
       const matchesSearch = college.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         college.city.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesState = selectedState === "all" || college.state === selectedState;
+      const matchesType = selectedType === "all" ||
+        college.type.toLowerCase() === selectedType.toLowerCase() ||
+        (selectedType.toLowerCase().includes("government") &&
+         college.type.toLowerCase().includes("government")) ||
+        (selectedType.toLowerCase().includes("state") &&
+         college.type.toLowerCase().includes("state")) ||
+        (selectedType.toLowerCase().includes("central") &&
+         college.type.toLowerCase().includes("central"));
       const matchesStream = selectedStream === "all" ||
         college.courses.some(course => course.stream === selectedStream);
       const matchesFacilities = selectedFacilities.length === 0 ||
         selectedFacilities.every(facility => college.facilities.includes(facility));
 
-      return matchesSearch && matchesState && matchesStream && matchesFacilities;
+      return matchesSearch && matchesState && matchesType && matchesStream && matchesFacilities;
     });
 
     // Sort colleges
     filtered.sort((a, b) => {
       switch (sortBy) {
-        // case "distance":
-        // const aDist = a.distance ? parseFloat(a.distance) : Infinity;     //Removed distance sorting as distance data is not available - will be later integrated via API
-        //   const bDist = b.distance ? parseFloat(b.distance) : Infinity;
-        //   return aDist - bDist;
         case "rating":
           const aRating = a.rating || 0;
           const bRating = b.rating || 0;
@@ -1478,7 +1528,7 @@ export default function Colleges() {
     });
 
     return filtered;
-  }, [searchQuery, selectedState, selectedStream, selectedFacilities, sortBy]);
+  }, [searchQuery, selectedState, selectedType, selectedStream, selectedFacilities, sortBy]);
 
   const handleFacilityToggle = (facility: string) => {
     setSelectedFacilities(prev =>
@@ -1493,7 +1543,7 @@ export default function Colleges() {
     setSelectedState("all");
     setSelectedStream("all");
     setSelectedFacilities([]);
-    setSortBy("distance");
+    setSortBy("rating");
   };
 
   const getFacilityIcon = (facility: string) => {
@@ -1502,7 +1552,7 @@ export default function Colleges() {
         return <BookOpen className="h-4 w-4" />;
       case "hostel": case "boys hostel": case "girls hostel": case "hostel (boys/girls)": case "2 girls hostels": case "8 boys hostels": case "hostels": case "hostels(ac)": case "limited hostels": case "multiple hostels": case "guest house":
         return <Building className="h-4 w-4" />;
-      case "wifi": case "24/7 wi-fi":
+      case "wifi": case "24/7 wi-fi": case "wi-fi":
         return <Wifi className="h-4 w-4" />;
       case "computer lab": case "innovation center": case "computer center": case "computer centers": case "computer labs": case "ict labs":
         return <Laptop className="h-4 w-4" />;
@@ -1530,115 +1580,184 @@ export default function Colleges() {
     }
   };
 
-  const CollegeCard = ({ college }: { college: typeof mockColleges[0] }) => (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <CardTitle className="text-lg mb-2">{college.name}</CardTitle>
-            <CardDescription className="flex items-center gap-2 mb-2">
-              <MapPin className="h-4 w-4" />
-              {college.location}, {college.city}, {college.state}
-            </CardDescription>
-            <div className="flex items-center gap-4 text-sm text-gray-600">
-              <span>Est. {college.establishedYear || 'N/A'}</span>
-              <Badge variant="outline">{college.type}</Badge>
-              <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span>{college.rating || 'N/A'}</span>
+  const CollegeCard = ({ college }: { college: typeof mockColleges[0] }) => {
+    const handleOpenWebsite = () => {
+      const website = (college.contact as any)?.website;
+      if (website) {
+        window.open(website.startsWith('http') ? website : `https://${website}`, '_blank', 'noopener,noreferrer');
+      } else {
+        window.open(`https://www.google.com/search?q=${encodeURIComponent(college.name + ' contact details')}`, '_blank', 'noopener,noreferrer');
+      }
+    };
+
+    return (
+      <Card className="hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <CardTitle className="text-lg mb-2">{college.name}</CardTitle>
+              <CardDescription className="flex items-center gap-2 mb-2">
+                <MapPin className="h-4 w-4" />
+                {college.location}, {college.city}, {college.state}
+              </CardDescription>
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <span>Est. {college.establishedYear || 'N/A'}</span>
+                <Badge variant="outline">{college.type}</Badge>
+                <div className="flex items-center gap-1">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <span>{college.rating || 'N/A'}</span>
+                </div>
               </div>
             </div>
+            <Button variant="ghost" size="sm">
+              <Heart className="h-4 w-4" />
+            </Button>
           </div>
-          <Button variant="ghost" size="sm">
-            <Heart className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
-      <CardContent>
-        <Tabs defaultValue="courses">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="facilities">Facilities</TabsTrigger>
-            <TabsTrigger value="contact">Contact</TabsTrigger>
-          </TabsList>
+        <CardContent>
+          <Tabs defaultValue="courses">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="facilities">Facilities</TabsTrigger>
+              <TabsTrigger value="contact">Contact</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="courses" className="space-y-3 mt-4">
-            {college.courses.slice(0, 2).map((course, index) => (
-              <div key={index} className="p-3 border rounded-lg">
-                <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-medium">{course.name}</h4>
-                  <Badge variant="secondary" className="text-xs">{course.stream}</Badge>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                  <span>Duration: {course.duration}</span>
-                  <span>Fees: ₹{course.fees.toLocaleString()}/year</span>
-                  <span>Eligibility: {course.eligibility}</span>
-                  <span>Cutoff: {course.cutoff}%</span>
-                </div>
-              </div>
-            ))}
-            {college.courses.length > 2 && (
-              <Button variant="ghost" size="sm" className="w-full">
-                View {college.courses.length - 2} more courses
-              </Button>
-            )}
-          </TabsContent>
-
-          <TabsContent value="facilities" className="mt-4">
-            <div className="grid grid-cols-2 gap-2">
-              {college.facilities.map((facility, index) => (
-                <div key={index} className="flex items-center gap-2 text-sm">
-                  {getFacilityIcon(facility)}
-                  <span>{facility}</span>
+            <TabsContent value="courses" className="space-y-3 mt-4">
+              {college.courses.slice(0, 2).map((course, index) => (
+                <div key={index} className="p-3 border rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-medium">{course.name}</h4>
+                    <Badge variant="secondary" className="text-xs">{course.stream}</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                    <span>Duration: {course.duration}</span>
+                    <span>Fees: ₹{course.fees.toLocaleString()}/year</span>
+                    <span>Eligibility: {course.eligibility}</span>
+                    <span>Cutoff: {course.cutoff}%</span>
+                  </div>
                 </div>
               ))}
-            </div>
-          </TabsContent>
+              {college.courses.length > 2 && (
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full">
+                      View {college.courses.length - 2} more courses
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>All Courses at {college.name}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 mt-4">
+                      {college.courses.map((course, index) => (
+                        <div key={index} className="p-4 border rounded-lg">
+                          <div className="flex justify-between items-start mb-3">
+                            <h4 className="font-semibold text-lg">{course.name}</h4>
+                            <Badge variant="secondary">{course.stream}</Badge>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div>
+                              <span className="font-medium">Duration:</span> {course.duration}
+                            </div>
+                            <div>
+                              <span className="font-medium">Fees:</span> ₹{course.fees.toLocaleString()}/year
+                            </div>
+                            <div>
+                              <span className="font-medium">Eligibility:</span> {course.eligibility}
+                            </div>
+                            <div>
+                              <span className="font-medium">Cutoff:</span> {course.cutoff}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
+            </TabsContent>
 
-          {/*Contact Tab */}
+            <TabsContent value="facilities" className="mt-4">
+              <div className="grid grid-cols-2 gap-2">
+                {college.facilities.map((facility, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm">
+                    {getFacilityIcon(facility)}
+                    <span>{facility}</span>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
 
-          <TabsContent value="contact" className="space-y-3 mt-4">
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-gray-500" />
-                <span>{(college.contact as any)?.phone || 'N/A'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-gray-500" />
-                <span>{(college.contact as any)?.email || 'N/A'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-gray-500" />
-                {(college.contact as any)?.website ? (
-                  <a href={`https://${(college.contact as any).website}`} className="text-blue-600 hover:underline">
-                    {(college.contact as any).website}
-                  </a>
-                ) : (
-                  <span>N/A</span>
-                )}
-              </div>
-              {/* <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-gray-500" />
-                <span>{college.distance ? `${college.distance} away` : 'N/A'}</span>
-              </div> */}
-            </div>
-          </TabsContent>
-        </Tabs>
+            {/*Contact Tab */}
 
-        <div className="flex gap-2 mt-4">
-          <Button className="flex-1">
-            Apply Now
-            <ExternalLink className="ml-2 h-4 w-4" />
-          </Button>
-          <Button variant="outline">
-            View Details
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+            <TabsContent value="contact" className="space-y-3 mt-4">
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-gray-500" />
+                  <span>{(college.contact as any)?.phone || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span>{(college.contact as any)?.email || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-gray-500" />
+                  {(college.contact as any)?.website ? (
+                    <a
+                      href={(college.contact as any).website.startsWith('http') ? (college.contact as any).website : `https://${(college.contact as any).website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {(college.contact as any).website}
+                    </a>
+                  ) : (
+                    <a
+                      href={`https://www.google.com/search?q=${encodeURIComponent(college.name + ' contact details')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      Search on Google
+                    </a>
+                  )}
+                </div>
+
+              </div>
+              <div className="mt-4">
+                <Button
+                  className="w-full"
+                  onClick={handleOpenWebsite}
+                >
+                  Contact Us
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex flex-wrap gap-2 mt-4">
+            <Button
+              className="flex-1 min-w-[120px]"
+              onClick={handleOpenWebsite}
+            >
+              Apply Now
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1 min-w-[120px]"
+              onClick={handleOpenWebsite}
+            >
+              View Details
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1695,6 +1814,22 @@ export default function Colleges() {
                       <SelectItem value="all">All States</SelectItem>
                       {allStates.map(state => (
                         <SelectItem key={state} value={state}>{state}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Type Filter */}
+                <div>
+                  <Label className="text-sm font-medium">Type</Label>
+                  <Select value={selectedType} onValueChange={setSelectedType}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      {allTypes.map(type => (
+                        <SelectItem key={type} value={type}>{type}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -1758,7 +1893,6 @@ export default function Colleges() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="rating">Highest Rated</SelectItem>
-                    {/* <SelectItem value="distance">Nearest First</SelectItem>   Removed distance sorting as distance data is not available */}
                     <SelectItem value="name">Name A-Z</SelectItem>
                     <SelectItem value="established">Newest First</SelectItem>
                   </SelectContent>
@@ -1768,33 +1902,6 @@ export default function Colleges() {
 
 
 
-
-
-            {/* College Cards - orginial code*/}
-            {/* {filteredColleges.length === 0 ? (
-              <Card className="p-8 text-center">
-                <div className="space-y-4">
-                  <MapPin className="h-12 w-12 text-gray-400 mx-auto" />
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No colleges found
-                    </h3>
-                    <p className="text-gray-600">
-                      Try adjusting your filters to see more results
-                    </p>
-                  </div>
-                  <Button onClick={clearFilters} variant="outline">
-                    Clear Filters
-                  </Button>
-                </div>
-              </Card>
-            ) : (
-                <div className="space-y-6">
-                  {filteredColleges.map(college => (
-                    <CollegeCard key={college.id} college={college} />
-                  ))}
-                </div>
-              )} */}
 
 
             {filteredColleges.length === 0 ? (
@@ -1821,9 +1928,6 @@ export default function Colleges() {
                 ))}
               </div>
             )}
-
-
-
 
             {/* Load More */}
             {filteredColleges.length > 0 && (

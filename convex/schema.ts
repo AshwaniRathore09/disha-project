@@ -1,10 +1,11 @@
+// convex/schema.ts
+
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  // User profiles and assessment data
   users: defineTable({
-    userId: v.string(), // Auth user ID
+    userId: v.string(),
     name: v.string(),
     email: v.string(),
     age: v.optional(v.number()),
@@ -12,13 +13,19 @@ export default defineSchema({
     currentClass: v.optional(v.string()),
     location: v.optional(v.string()),
     phone: v.optional(v.string()),
+    bio: v.optional(v.string()),
+    interests: v.optional(v.array(v.string())),
+    school: v.optional(v.string()),
+    stream: v.optional(v.string()),
+    subjects: v.optional(v.array(v.string())),
+    percentage: v.optional(v.number()),
+    preferredStreams: v.optional(v.array(v.string())),
     createdAt: v.number(),
   }).index("by_user_id", ["userId"]),
 
-  // Aptitude assessment results
   assessments: defineTable({
     userId: v.string(),
-    type: v.string(), // "aptitude", "interest", "personality"
+    type: v.string(),
     questions: v.array(v.object({
       questionId: v.string(),
       answer: v.union(v.string(), v.number()),
@@ -33,22 +40,21 @@ export default defineSchema({
     completedAt: v.number(),
   }).index("by_user_id", ["userId"]),
 
-  // Government colleges data
   colleges: defineTable({
     name: v.string(),
     location: v.string(),
     city: v.string(),
     state: v.string(),
-    type: v.string(), // "government", "aided", "autonomous"
+    type: v.string(),
     establishedYear: v.optional(v.number()),
     affiliation: v.optional(v.string()),
     courses: v.array(v.object({
       name: v.string(),
-      stream: v.string(), // "science", "commerce", "arts", "vocational"
+      stream: v.string(),
       duration: v.string(),
       eligibility: v.string(),
-      cutoff: v.optional(v.number()),
-      fees: v.optional(v.number()),
+      cutoff: v.optional(v.string()),
+      fees: v.optional(v.string()),
     })),
     facilities: v.array(v.string()),
     contact: v.object({
@@ -56,20 +62,17 @@ export default defineSchema({
       email: v.optional(v.string()),
       website: v.optional(v.string()),
     }),
-    coordinates: v.optional(v.object({
-      lat: v.number(),
-      lng: v.number(),
-    })),
-  }).index("by_location", ["city", "state"])
-    .index("by_stream", ["courses"]),
+    rating: v.optional(v.number()),
+  }).index("by_location", ["city", "state"]),
 
-  // Career paths and course information
-  careerPaths: defineTable({
+  careers: defineTable({
     courseName: v.string(),
     stream: v.string(),
-    duration: v.string(),
-    eligibility: v.string(),
     description: v.string(),
+    duration: v.optional(v.string()),
+    eligibility: v.optional(v.string()),
+    eligibilityFilter: v.optional(v.string()),
+    eligibilityDisplay: v.optional(v.string()),
     careerOptions: v.array(v.object({
       title: v.string(),
       description: v.string(),
@@ -83,52 +86,53 @@ export default defineSchema({
     })),
     governmentExams: v.array(v.string()),
     skillsRequired: v.array(v.string()),
-    industryDemand: v.string(), // "high", "medium", "low"
+    industryDemand: v.string(),
+    demand_score: v.float64(),
+    risk_score: v.float64(),
+    averageSalary: v.optional(v.string()),
+    futureScope: v.optional(v.string()),
+    jobGrowth: v.optional(v.string()),
   }).index("by_stream", ["stream"]),
 
-  // Important dates and notifications
   notifications: defineTable({
     title: v.string(),
     description: v.string(),
-    type: v.string(), // "admission", "scholarship", "exam", "counseling"
+    type: v.string(),
     date: v.number(),
     endDate: v.optional(v.number()),
-    targetAudience: v.array(v.string()), // ["class10", "class12", "undergraduate"]
-    priority: v.string(), // "high", "medium", "low"
+    targetAudience: v.array(v.string()),
+    priority: v.string(),
     link: v.optional(v.string()),
     isActive: v.boolean(),
   }).index("by_date", ["date"])
     .index("by_type", ["type"]),
 
-  // User bookmarks and favorites
   bookmarks: defineTable({
     userId: v.string(),
-    itemType: v.string(), // "college", "course", "career"
+    itemType: v.string(),
     itemId: v.string(),
     createdAt: v.number(),
   }).index("by_user_id", ["userId"])
     .index("by_user_and_type", ["userId", "itemType"]),
 
-  // Study materials and resources
   resources: defineTable({
     title: v.string(),
     description: v.string(),
-    type: v.string(), // "ebook", "video", "article", "practice_test"
-    category: v.string(), // stream or subject
+    type: v.string(),
+    category: v.string(),
     fileUrl: v.optional(v.id("_storage")),
     externalUrl: v.optional(v.string()),
     tags: v.array(v.string()),
-    difficulty: v.string(), // "beginner", "intermediate", "advanced"
+    difficulty: v.string(),
     downloadCount: v.number(),
     isApproved: v.boolean(),
   }).index("by_category", ["category"])
     .index("by_type", ["type"]),
 
-  // User progress tracking
   userProgress: defineTable({
     userId: v.string(),
     milestones: v.array(v.object({
-      type: v.string(), // "assessment_completed", "college_applied", "course_selected"
+      type: v.string(),
       date: v.number(),
       description: v.string(),
     })),
@@ -136,5 +140,12 @@ export default defineSchema({
     selectedColleges: v.array(v.string()),
     selectedCourses: v.array(v.string()),
     lastActive: v.number(),
+  }).index("by_user_id", ["userId"]),
+  
+  chatbotMessages: defineTable({
+    userId: v.string(),
+    message: v.string(),
+    response: v.string(),
+    timestamp: v.number(),
   }).index("by_user_id", ["userId"]),
 });

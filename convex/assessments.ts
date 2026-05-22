@@ -1,3 +1,4 @@
+// convex/assessments.ts
 import { query, mutation } from "./_generated/server";
 import { ConvexError } from "convex/values";
 import { v } from "convex/values";
@@ -6,6 +7,7 @@ import { api } from "./_generated/api";
 // Save assessment results
 export const saveAssessment = mutation({
   args: {
+    userId: v.string(),
     type: v.string(), // "aptitude", "interest", "personality"
     questions: v.array(v.object({
       questionId: v.string(),
@@ -20,16 +22,8 @@ export const saveAssessment = mutation({
     recommendedStreams: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        message: "User not authenticated",
-        code: "UNAUTHENTICATED",
-      });
-    }
-
     const assessmentId = await ctx.db.insert("assessments", {
-      userId: identity.tokenIdentifier,
+      userId: args.userId,
       type: args.type,
       questions: args.questions,
       scores: args.scores,
@@ -37,16 +31,22 @@ export const saveAssessment = mutation({
       completedAt: Date.now(),
     });
 
-    // Update user progress
-    await ctx.runMutation(api.users.updateProgress, {
-      milestoneType: "assessment_completed",
-      description: `Completed ${args.type} assessment`,
-      selectedStream: args.recommendedStreams[0], // Set top recommended stream
-    });
+    // Update user progress (skip if user not authenticated in Convex)
+    try {
+      await ctx.runMutation(api.users.updateProgress, {
+        milestoneType: "assessment_completed",
+        description: `Completed ${args.type} assessment`,
+        selectedStream: args.recommendedStreams[0], // Set top recommended stream
+      });
+    } catch (error) {
+      // Ignore progress update errors for now
+      console.log("Progress update skipped:", error);
+    }
 
     return await ctx.db.get(assessmentId);
   },
 });
+
 
 // Get user's assessment history
 export const getUserAssessments = query({

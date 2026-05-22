@@ -1,16 +1,21 @@
+// src/pages/Assessment.tsx
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  Target, 
-  Brain, 
-  Heart, 
-  User, 
-  ArrowRight, 
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Target,
+  Brain,
+  Heart,
+  User,
+  ArrowRight,
   ArrowLeft,
   CheckCircle,
   Clock,
   BarChart3
 } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@/components/providers/auth";
 
 import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
@@ -18,8 +23,8 @@ import { Progress } from "@/components/ui/progress.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { Label } from "@/components/ui/label.tsx";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
 
+// ... Keep your Question type and questions arrays (aptitudeQuestions, etc.) ...
 type AssessmentType = "aptitude" | "interest" | "personality";
 
 interface Question {
@@ -128,16 +133,22 @@ const personalityQuestions: Question[] = [
   }
 ];
 
+
 export default function Assessment() {
   const navigate = useNavigate();
-  const [selectedAssessment, setSelectedAssessment] = useState<AssessmentType | null>(null);  //selectedAssessment → which test is chosen (aptitude, interest, personality, or null if not chosen yet).
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0); //currentQuestionIndex → shows which question number the user is on.
+  const { user } = useAuth();
+  const [selectedAssessment, setSelectedAssessment] = useState<AssessmentType | null>(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isCompleted, setIsCompleted] = useState(false);
   const [results, setResults] = useState<Record<string, number> | null>(null);
 
-  const getCurrentQuestions = () => {   //Depending on which assessment is selected, it loads the correct question bank.
-    switch (selectedAssessment) {
+  // UPDATED: Use the Convex mutation
+  const submit = useMutation(api.assessments.saveAssessment);
+
+  const getCurrentQuestions = () => {
+    // ... (this function remains the same)
+      switch (selectedAssessment) {
       case "aptitude": return aptitudeQuestions;
       case "interest": return interestQuestions;
       case "personality": return personalityQuestions;
@@ -145,16 +156,13 @@ export default function Assessment() {
     }
   };
 
-  const questions = getCurrentQuestions();  //questions → full set of questions for the chosen test.
-  const currentQuestion = questions[currentQuestionIndex];   //the question currently being shown.
-  const progress = ((currentQuestionIndex + 1) / questions.length) * 100; //for showing progress bar if needed
- 
+  const questions = getCurrentQuestions();
+  const currentQuestion = questions[currentQuestionIndex];
+  const progress = ((currentQuestionIndex + 1) / (questions.length || 1)) * 100;
+
   const handleAnswerSelect = (value: string) => {
     if (currentQuestion) {
-      setAnswers(prev => ({
-        ...prev,
-        [currentQuestion.id]: value
-      }));
+      setAnswers(prev => ({ ...prev, [currentQuestion.id]: value }));
     }
   };
 
@@ -172,54 +180,72 @@ export default function Assessment() {
     }
   };
 
-  const completeAssessment = () => {
-    // Calculate scores based on answers
-    const scores = calculateScores();
-    setResults(scores);
-    setIsCompleted(true);
-  };
+  // UPDATED: Call the backend mutation
+  const completeAssessment = async () => {
+    try {
+      // Calculate scores based on answers
+      const scores: { science: number; commerce: number; arts: number; vocational: number; } = { science: 0, commerce: 0, arts: 0, vocational: 0 };
 
-  const calculateScores = (): Record<string, number> => {
-    const streamScores = { science: 0, commerce: 0, arts: 0, vocational: 0 };
-    
-    Object.values(answers).forEach(answer => {
-      // Simple scoring logic - in real app, this would be more sophisticated
-      if (answer.includes("Mathematics") || answer.includes("technical") || answer.includes("Labs") || 
-          answer.includes("Science") || answer.includes("data and logic") || answer.includes("AI")) {
-        streamScores.science += 1;
-      }
-      if (answer.includes("Economics") || answer.includes("Business") || answer.includes("research") ||
-          answer.includes("Corporate") || answer.includes("market") || answer.includes("entrepreneurship")) {
-        streamScores.commerce += 1;
-      }
-      if (answer.includes("History") || answer.includes("Literature") || answer.includes("communication") ||
-          answer.includes("social") || answer.includes("philosophy") || answer.includes("others")) {
-        streamScores.arts += 1;
-      }
-      if (answer.includes("Art") || answer.includes("Design") || answer.includes("creative") ||
-          answer.includes("Studios") || answer.includes("culture") || answer.includes("passion")) {
-        streamScores.vocational += 1;
-      }
-    });
-
-    // Normalize scores to percentages
-    const total = Object.values(streamScores).reduce((sum, score) => sum + score, 0);
-    if (total > 0) {
-      Object.keys(streamScores).forEach(key => {
-        streamScores[key as keyof typeof streamScores] = Math.round((streamScores[key as keyof typeof streamScores] / total) * 100);
+      Object.values(answers).forEach((answer: string) => {
+        if (answer.includes("Mathematics") || answer.includes("technical") || answer.includes("Labs") ||
+            answer.includes("Science") || answer.includes("data and logic") || answer.includes("AI")) {
+          scores.science += 1;
+        }
+        if (answer.includes("Economics") || answer.includes("Business") || answer.includes("research") ||
+            answer.includes("Corporate") || answer.includes("market") || answer.includes("entrepreneurship")) {
+          scores.commerce += 1;
+        }
+        if (answer.includes("History") || answer.includes("Literature") || answer.includes("communication") ||
+            answer.includes("social") || answer.includes("philosophy") || answer.includes("others")) {
+          scores.arts += 1;
+        }
+        if (answer.includes("Art") || answer.includes("Design") || answer.includes("creative") ||
+            answer.includes("Studios") || answer.includes("culture") || answer.includes("passion")) {
+          scores.vocational += 1;
+        }
       });
-    }
 
-    return streamScores;
+      // Normalize scores to percentages
+      const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
+      if (total > 0) {
+        (Object.keys(scores) as Array<keyof typeof scores>).forEach(key => {
+          scores[key] = Math.round((scores[key] / total) * 100);
+        });
+      }
+
+      const recommendedStreams = Object.entries(scores)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 2)
+        .map(([stream]) => stream);
+
+      // Format questions
+      const questions = Object.entries(answers).map(([questionId, answer]) => ({ questionId, answer }));
+
+      const result = await submit({
+        userId: user?._id || "",
+        type: selectedAssessment!,
+        questions,
+        scores,
+        recommendedStreams,
+      });
+
+      if (result) {
+        setResults(result.scores);
+        setIsCompleted(true);
+      }
+    } catch (error) {
+      console.error("Failed to submit assessment:", error);
+    }
   };
+  
+  // REMOVED: calculateScores function is no longer needed here.
 
   const getRecommendedStreams = () => {
     if (!results) return [];
-    
     return Object.entries(results)
-      .sort(([,a], [,b]) => (b as number) - (a as number))
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 2)
-      .map(([stream, score]) => ({ stream, score: score as number }));
+      .map(([stream, score]) => ({ stream, score }));
   };
 
   const resetAssessment = () => {
@@ -229,7 +255,8 @@ export default function Assessment() {
     setIsCompleted(false);
     setResults(null);
   };
-
+  
+  // The rest of your JSX remains the same. No changes needed for rendering.
   if (!selectedAssessment) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -405,9 +432,9 @@ export default function Assessment() {
                         {stream === 'vocational' && "Excellent for creative minds interested in practical skills and artistic expression."}
                       </p>
                       <Button size="sm" variant="outline" asChild>
-                        <a href={`/careers?stream=${stream}`}>
+                        <Link to={`/careers?stream=${stream}`}>
                           Explore {stream} careers
-                        </a>
+                        </Link>
                       </Button>
                     </div>
                   ))}
@@ -461,13 +488,13 @@ export default function Assessment() {
               <CardContent>
                 <RadioGroup
                   value={answers[currentQuestion.id] || ""}
-                  onValueChange={handleAnswerSelect}
+ g                 onValueChange={handleAnswerSelect}
                   className="space-y-3"
                 >
                   {currentQuestion.options.map((option, index) => (
                     <div key={index} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-gray-50">
-                      <RadioGroupItem value={option} id={option} />
-                      <Label htmlFor={option} className="flex-1 cursor-pointer">
+                      <RadioGroupItem value={option} id={`${currentQuestion.id}-${index}`} />
+                      <Label htmlFor={`${currentQuestion.id}-${index}`} className="flex-1 cursor-pointer">
                         {option}
                       </Label>
                     </div>

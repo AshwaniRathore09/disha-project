@@ -1,32 +1,47 @@
-import { useCallback } from "react";
-import {
-  AuthProvider as ReactAuthProvider,
-  type AuthProviderProps,
-} from "react-oidc-context";
+import { createContext, useContext, type ReactNode, useCallback } from "react";
+import { useAuth as useCustomAuth } from "@/hooks/use-auth";
 
-const AUTH_CONFIG: AuthProviderProps = {
-  authority: import.meta.env.VITE_HERCULES_OIDC_AUTHORITY!,
-  client_id: import.meta.env.VITE_HERCULES_OIDC_CLIENT_ID!,
-  redirect_uri: window.location.origin,
-  response_type: "code",
-  scope: "openid profile email",
+type AuthContextProps = {
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  user: any | null;
+  signin: (email: string, passcode: string) => Promise<void>;
+  removeUser: () => void;
+  signout: () => void;
 };
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const onSigninCallback = useCallback(() => {
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }, []);
-  const onSignoutCallback = useCallback(() => {
-    window.location.pathname = "";
-  }, []);
+export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-  return (
-    <ReactAuthProvider
-      {...AUTH_CONFIG}
-      onSigninCallback={onSigninCallback}
-      onSignoutCallback={onSignoutCallback}
-    >
-      {children}
-    </ReactAuthProvider>
+export function useAuth(): AuthContextProps {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const auth = useCustomAuth();
+
+  const signin = useCallback(
+    async (email: string, passcode: string) => {
+      await auth.signinRedirect(email, passcode);
+    },
+    [auth]
   );
+
+  const signout = useCallback(() => {
+    auth.removeUser();
+  }, [auth]);
+
+  const value: AuthContextProps = {
+    isLoading: auth.isLoading,
+    isAuthenticated: auth.isAuthenticated,
+    user: auth.user,
+    signin,
+    removeUser: auth.removeUser,
+    signout,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

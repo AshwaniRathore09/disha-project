@@ -1,137 +1,46 @@
-import { forwardRef, useCallback, useEffect } from "react";
-import { type VariantProps } from "class-variance-authority";
-import { Loader2, LogIn, LogOut } from "lucide-react";
+// src/components/ui/signin.tsx
+
+import { forwardRef, useState } from "react";
+import { LogIn, LogOut } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils.ts";
-import { useAuth } from "@/hooks/use-auth.ts";
-import { Button, buttonVariants } from "@/components/ui/button.tsx";
+import { useAuth } from "@/components/providers/auth";
+import { Button } from "@/components/ui/button.tsx";
 
-export interface SignInButtonProps
-  extends Omit<React.ComponentProps<"button">, "onClick">,
-    VariantProps<typeof buttonVariants> {
-  /**
-   * Custom onClick handler that runs before authentication action
-   */
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  /**
-   * Whether to show icons in the button
-   * @default true
-   */
-  showIcon?: boolean;
-  /**
-   * Custom text for sign in state
-   * @default "Sign In"
-   */
-  signInText?: string;
-  /**
-   * Custom text for sign out state
-   * @default "Sign Out"
-   */
-  signOutText?: string;
-  /**
-   * Custom text for loading state
-   * @default "Signing In..." or "Signing Out..."
-   */
-  loadingText?: string;
-  /**
-   * Whether to use the asChild pattern
-   * @default false
-   */
-  asChild?: boolean;
-}
+export const SignInButton = forwardRef<HTMLButtonElement, React.ComponentProps<"button">>(
+  ({ className, ...props }, ref) => {
+    const { isAuthenticated, removeUser, isLoading } = useAuth();
 
-/**
- * A button component that handles authentication sign in/out with proper loading states
- * and accessibility features.
- */
-export const SignInButton = forwardRef<HTMLButtonElement, SignInButtonProps>(
-  (
-    {
-      onClick,
-      disabled,
-      showIcon = true,
-      signInText = "Sign In",
-      signOutText = "Sign Out",
-      loadingText,
-      className,
-      variant,
-      size,
-      asChild = false,
-      ...props
-    },
-    ref,
-  ) => {
-    const { isAuthenticated, signinRedirect, removeUser, isLoading, error } =
-      useAuth();
-
-    useEffect(() => {
-      if (error) {
-        toast.error("Login error", {
-          description: error.message,
-        });
-        console.error("Login error", error);
+    const handleClick = async () => {
+      if (isAuthenticated) {
+        await removeUser();
+        toast.success("Signed out successfully!");
+      } else {
+        // Navigate to login page
+        window.location.href = "/login";
       }
-    }, [error]);
-
-    const handleClick = useCallback(
-      async (event: React.MouseEvent<HTMLButtonElement>) => {
-        // Run custom onClick first
-        onClick?.(event);
-
-        try {
-          if (isAuthenticated) {
-            await removeUser();
-          } else {
-            await signinRedirect();
-          }
-        } catch (err) {
-          console.error("Authentication error:", err);
-          // Don't prevent the default here as the auth library handles errors
-        }
-      },
-      [isAuthenticated, signinRedirect, removeUser, onClick],
-    );
-
-    const isDisabled = disabled || isLoading;
-    const defaultLoadingText = isAuthenticated
-      ? "Signing Out..."
-      : "Signing In...";
-    const currentLoadingText = loadingText || defaultLoadingText;
-
-    const buttonText = isLoading
-      ? currentLoadingText
-      : isAuthenticated
-        ? signOutText
-        : signInText;
-
-    const icon = isLoading ? (
-      <Loader2 className="size-4 animate-spin" />
-    ) : isAuthenticated ? (
-      <LogOut className="size-4" />
-    ) : (
-      <LogIn className="size-4" />
-    );
+    };
 
     return (
       <Button
         ref={ref}
         onClick={handleClick}
-        disabled={isDisabled}
-        variant={variant}
-        size={size}
+        disabled={isLoading}
         className={cn(className)}
-        asChild={asChild}
-        aria-label={
-          isAuthenticated
-            ? "Sign out of your account"
-            : "Sign in to your account"
-        }
-        aria-describedby={error ? "auth-error" : undefined}
         {...props}
       >
-        {showIcon && icon}
-        {buttonText}
+        {isAuthenticated ? (
+          <>
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
+          </>
+        ) : (
+          <>
+            <LogIn className="mr-2 h-4 w-4" />
+            Sign In
+          </>
+        )}
       </Button>
     );
   },

@@ -1,64 +1,84 @@
-import { useCallback, useEffect, useMemo } from "react";
-import { useAuth as useOidcAuth } from "react-oidc-context";
+import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
-type UseAuthHook = {
-  fetchAccessToken: (args: {
-    forceRefreshToken: boolean;
-  }) => Promise<string | null>;
-} & ReturnType<typeof useOidcAuth>;
-
-export function useAuth(): UseAuthHook {
-  const oidcAuth = useOidcAuth();
-
-  const idToken = oidcAuth.user?.id_token;
-  const fetchAccessToken = useCallback(
-    // eslint-disable-next-line no-empty-pattern
-    async ({}: { forceRefreshToken: boolean }) => {
-      // TODO: refresh token if needed
-      return idToken ?? null;
-    },
-    [idToken],
-  );
-
-  return useMemo(
-    () => ({
-      ...oidcAuth,
-      fetchAccessToken,
-    }),
-    [oidcAuth, fetchAccessToken],
-  );
-}
-
-type UseUserProps = {
-  /**
-   * Whether to automatically redirect to the login if the user is not authenticated
-   */
-  shouldRedirect?: boolean;
+const DUMMY_USER = {
+  _id: "dummy-user-id",
+  name: "Ashwani Rathore",
+  avatar: "https://i.pravatar.cc/150?img=3",
+  createdAt: Date.now(),
 };
 
-export function useUser({ shouldRedirect }: UseUserProps = {}) {
-  const { user, isLoading, error, isAuthenticated, signinRedirect } = useAuth();
+export function useAuth() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  const convexUser = useQuery(api.users.getCurrentUser, isAuthenticated ? undefined : "skip");
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && shouldRedirect) {
-      signinRedirect();
-    }
-  }, [isLoading, isAuthenticated, shouldRedirect, signinRedirect]);
+    // On mount, check if user is already authenticated
+    const storedAuth = localStorage.getItem("isAuthenticated");
+    const storedUser = localStorage.getItem("currentUser");
 
-  return useMemo(() => {
-    const id = user?.profile.sub;
-    const name = user?.profile.name;
-    const email = user?.profile.email;
-    const avatar = user?.profile.picture;
-    return {
-      ...(user ?? {}),
-      id,
-      name,
-      email,
-      avatar,
-      isAuthenticated,
-      isLoading,
-      error,
-    };
-  }, [user, isAuthenticated, isLoading, error]);
+    if (storedAuth === "true" && storedUser) {
+      setIsAuthenticated(true);
+      setCurrentUser(JSON.parse(storedUser));
+    }
+    setIsLoading(false); // Always set loading to false after checking
+  }, []); // Run only on mount
+
+  const user = useMemo(() => {
+    if (!isAuthenticated) return null;
+    // Priority: convexUser > stored currentUser > DUMMY_USER
+    return convexUser || currentUser || DUMMY_USER;
+  }, [isAuthenticated, convexUser, currentUser]);
+
+  const signinRedirect = async (email: string, passcode: string) => {
+    setIsLoading(true);
+    try {
+      // Check against stored users in localStorage
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      const foundUser = users.find((u: any) => u.email === email && u.password === passcode);
+
+      // Simulate async operation
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (foundUser) {
+        setIsAuthenticated(true);
+        localStorage.setItem("currentUser", JSON.stringify(foundUser));
+        localStorage.setItem("isAuthenticated", "true"); // Persist auth state
+        setIsLoading(false);
+        return Promise.resolve();
+      } else {
+        throw new Error("Invalid credentials");
+      }
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const removeUser = () => {
+    setIsAuthenticated(false);
+    setIsLoading(false);
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("isAuthenticated"); // Clear persisted auth state
+    // Redirect to home page after logout
+    window.location.href = "/";
+  };
+
+  return {
+    isLoading,
+    isAuthenticated,
+    user,
+    signinRedirect,
+    removeUser,
+  };
+}
+
+export function useUser({ shouldRedirect = false } = {}) {
+  const auth = useAuth();
+  // Redirect logic can be handled within components that use this hook if needed
+  return auth;
 }

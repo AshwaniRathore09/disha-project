@@ -1,11 +1,9 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, GraduationCap, MapPin, Users, Target, Calendar } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, MapPin, Users, Target, Calendar, Home } from "lucide-react";
 
 import { Button } from "@/components/ui/button.tsx";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
-import { useAuth } from "@/hooks/use-auth.ts";
-import { SignInButton } from "@/components/ui/signin.tsx";
-
+import { useAuth } from "@/components/providers/auth.tsx";
 
 export default function Index() {
   const { isAuthenticated } = useAuth();
@@ -27,9 +25,18 @@ export default function Index() {
               and career paths.
             </p>
             <div className="mt-10 flex space-x-4">
-              <button className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800">
-                Sign In
-              </button>
+              {isAuthenticated ? (
+                <Link to="/dashboard" className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800">
+                  <Home className="h-5 w-5" />
+                  Dashboard
+                </Link>
+              ) : (
+                <Link to="/login">
+                  <button className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800">
+                    Sign In
+                  </button>
+                </Link>
+              )}
               <Link to="/colleges">
                 <button className="px-6 py-3 bg-white border rounded-lg hover:bg-gray-100">
                   Explore Colleges
@@ -70,7 +77,7 @@ export default function Index() {
           <Card className="cursor-pointer border border-gray-200 transition-all transform hover:-translate hover:border-blue-500 hover:shadow-lg">
             <CardHeader>
               <Target className="h-12 w-12 text-blue-600 mb-4" />
-              <CardTitle>Aptitude Assessment</CardTitle>
+              <CardTitle>Decide your Goal</CardTitle>
               <CardDescription>
                 Take comprehensive quizzes to discover your strengths, interests, and ideal career paths
               </CardDescription>
@@ -155,7 +162,7 @@ export default function Index() {
           <Card className="cursor-pointer border border-gray-200 transition-all transform hover:-translate hover:border-indigo-500 hover:shadow-lg">
             <CardHeader>
               <GraduationCap className="h-12 w-12 text-indigo-600 mb-4" />
-              <CardTitle>Personalized Guidance</CardTitle>
+              <CardTitle>Profile</CardTitle>
               <CardDescription>
                 Get AI-powered recommendations based on your profile, location, and career goals
               </CardDescription>
